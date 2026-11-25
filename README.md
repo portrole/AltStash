@@ -175,7 +175,7 @@ AltStash Copyright (C) 2026 Demnock.
 AltStash is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation, version 3 of the License (GPL-3.0). It is distributed in the hope that it will be
 useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the [LICENSE](LICENSE) file for the full text.
+See the [LICENSE](LICENSE) file for the full text (kept verbatim so GitHub detects it) and [NOTICE](NOTICE) for the copyright notice.
 
 ## Credits
 

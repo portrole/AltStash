@@ -1,0 +1,11 @@
+AltStash Copyright (C) 2026 Demnock
+
+AltStash is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 (GPL-3.0). It is distributed WITHOUT ANY WARRANTY. See
+the LICENSE file for the full license text.
+
+QuestItemDB.lua contains quest and item data from QuestieDB
+(https://github.com/Questie/QuestieDB), release 1.1.6, Forever flavor,
+commit 4377c981ac368d1593ec92788218e0a689a6a02b, used under GPL-3.0 terms.
+AltStash was started by Jojo.
