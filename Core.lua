@@ -9,7 +9,7 @@ local DEBOUNCE = 0.3      -- seconds to coalesce bursts of events before scannin
 
 local function Print(msg) DEFAULT_CHAT_FRAME:AddMessage("|cff33ccffAltStash:|r " .. tostring(msg)) end
 AS.Print = Print
-AS.version = "0.3.9"
+AS.version = "0.4.0"
 
 local function IsSecret(v) return issecretvalue and issecretvalue(v) or false end
 
@@ -1592,6 +1592,9 @@ local function Help()
     print("  /as list                  - saved characters and when each was last scanned")
     print("  /as prices on|off         - craft-or-sell advice from Auctionator prices in Craftables (needs Auctionator + an AH scan)")
     print("  /as usage on|off          - Quest / Crafting / Safe to sell tags in the Items view")
+    print("  /as keep <item>           - never show an item as safe to sell / delete (no item: list)")
+    print("  /as unkeep <item|all>     - remove an item from the keep list")
+    print("  /as questinfo <item>      - quest IDs, completion and the reason behind an item's verdict")
     print("  /as deposit 2|8|24        - auction duration used for deposit estimates (now " .. (AS.Prices and AS.Prices.Hours() or 24) .. "h)")
     print("  /as mindeposit <copper>   - minimum deposit per auction (now " .. AS.FormatMoney(AS.Prices and AS.Prices.MinDeposit() or 100) .. ")")
     print("  /as sort profit|default   - Craftables order")
@@ -1737,6 +1740,25 @@ SlashCmdList["ALTSTASH"] = function(msg)
         if a == "profit" then AS.db.settings.craftSort = "profit" elseif a == "default" or a == "off" then AS.db.settings.craftSort = nil end
         Print("Craftables sort: " .. (AS.db.settings.craftSort == "profit" and "profit" or "default") .. ". Use /as sort profit|default.")
         if AS.RefreshUI then AS.RefreshUI() end
+    elseif cmd == "keep" or cmd == "unkeep" then
+        local U = AS.Usage
+        if not U then return end
+        if cmd == "unkeep" and arg:lower() == "all" then AS.db.keep = nil; Print("Keep list cleared."); if AS.RefreshUI then AS.RefreshUI() end; return end
+        local id = U.ParseItemArg(arg)
+        if not id then
+            local ids = {}
+            for k in pairs(U.KeepList()) do ids[#ids + 1] = k end
+            table.sort(ids)
+            local names = {}
+            for i, k in ipairs(ids) do if i > 20 then names[#names + 1] = "..."; break end names[#names + 1] = ((AS.ItemName and AS.ItemName(k, nil)) or "item") .. " (" .. k .. ")" end
+            Print("Keep list: " .. (#ids > 0 and table.concat(names, ", ") or "(empty)") .. ". Use /as keep <item link or ID>, /as unkeep <item link or ID|all>.")
+            return
+        end
+        U.SetKept(id, cmd == "keep")
+        Print(((AS.ItemName and AS.ItemName(id, nil)) or ("item " .. id)) .. (cmd == "keep" and " is on your keep list: never shown as safe to sell / delete." or " removed from your keep list."))
+        if AS.RefreshUI then AS.RefreshUI() end
+    elseif cmd == "questinfo" or cmd == "qi" then
+        if AS.Usage and AS.Usage.QuestInfoLines then for _, l in ipairs(AS.Usage.QuestInfoLines(arg)) do Print(l) end end
     elseif cmd == "list" then AS.ListChars()
     elseif cmd == "reset" then AS.ResetChar(arg)
     elseif cmd == "debugname" then AS.DebugName()

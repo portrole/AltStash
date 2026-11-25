@@ -2,6 +2,13 @@
 
 All notable changes to AltStash. Newest first.
 
+## v0.4.0
+
+- More accurate "Quest done: safe to delete": a built-in quest database (QuestItemDB.lua, from QuestieDB Forever data) cross-references every quest that uses an item and the later steps of its chain. An item is safe only when all of them are completed on that character and none is active on any character.
+- Class-quest, starter and unresolved items now show "Keep: quest chain not finished (quest, ID)" or "Quest item: can't confirm, keep". A quest turn-in reward alone never makes an item safe.
+- New commands: `/as keep`, `/as unkeep`, and `/as questinfo` (quest IDs, completion and the reason behind the verdict).
+- Hold Shift over an item to see its quest IDs on the tooltip. The Items-view tags and the Safe to sell / delete filter use the same rules.
+
 ## v0.3.9
 
 - Hovering an item in bags, the bank, or a chat link adds one AltStash line to the game tooltip: quest done (safe to delete), needed for a quest, crafting reagent, or safe to sell.

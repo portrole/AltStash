@@ -43,6 +43,12 @@ local function AddUsageLine(tooltip, itemID)
     local u = AS.Usage.UsageForTooltip(itemID)
     local line = u and AS.Usage.TooltipLine(u)
     if line then tooltip:AddLine(line, 1, 1, 1, true) end
+    -- 0.4.0: hold Shift for the quest IDs behind the verdict
+    local shift = type(IsShiftKeyDown) == "function" and IsShiftKeyDown()
+    if shift and u and AS.Usage.TooltipQuestLine then
+        local ql = AS.Usage.TooltipQuestLine(u)
+        if ql then tooltip:AddLine(ql, 1, 1, 1, true) end
+    end
 end
 AS._AddUsageLine = AddUsageLine
 

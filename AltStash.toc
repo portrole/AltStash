@@ -2,7 +2,7 @@
 ## Title: AltStash
 ## Notes: Find an item across all your characters' bags, bank and mail. Passive reads only - no automation.
 ## Author: Demnock
-## Version: 0.3.9
+## Version: 0.4.0
 ## OptionalDeps: Auctionator
 ## IconTexture: Interface\Icons\INV_Misc_Bag_07
 ## SavedVariables: AltStashDB
@@ -15,5 +15,6 @@ Core.lua
 API.lua
 Tooltip.lua
 Prices.lua
+QuestItemDB.lua
 Usage.lua
 UI.lua

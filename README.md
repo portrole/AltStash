@@ -1,4 +1,4 @@
-# AltStash 0.3.9
+# AltStash 0.4.0
 
 Find an item across all your characters' **bags, bank and mail** (e.g. a crafting reagent you know one of your alts is holding).
 Passive only: it reads what the client already shows you and saves it to SavedVariables. It never moves, uses, loots, sends or
@@ -29,21 +29,40 @@ Originally started by **Jojo**, a helper bot, and extended by **Demnock**.
 
 Each row in a character's **Items** list gets a usage tag, explained in the tooltip:
 
-- **Quest** (yellow): a quest item (item class Quest or quest bind type), or an item that is an objective of a quest in **any** of your characters' saved quest logs (tooltip: `Quest: Scarlet Menace (Demnock) 3/10`). A quest item whose quest AltStash hasn't seen says **Quest item (unknown quest)** and is never marked safe.
-- **Quest done: safe to delete** (green): a quest item whose quest is known (seen as an objective, or as a quest item / quest starter in the bags) **and** flagged completed on that character (`C_QuestLog.IsQuestFlaggedCompleted` / Classic `IsQuestFlaggedCompleted`), **and** no active quest on any character needs it, **and** no saved recipe uses it. Completed only by another character is noted but not marked safe (quest items are usually per character).
+- **Quest** (yellow): a quest item (item class Quest or quest bind type), or an item that is an objective of a quest in **any** of your characters' saved quest logs (tooltip: `Quest: Scarlet Menace (Demnock) 3/10`). A quest item that isn't in the quest database says **Quest item: can't confirm, keep** and is never marked safe (0.4.0).
+- **Quest done: safe to delete** (green): since 0.4.0 only when the built-in quest database maps the item to quest IDs **and** every quest that uses it, plus the later steps of those chains, is completed on that character (`C_QuestLog.IsQuestFlaggedCompleted` / Classic `IsQuestFlaggedCompleted`), **and** none is active on any character, **and** no saved recipe uses it. See "Quest database cross-reference (0.4.0)" below. Completed only by another character is noted but not marked safe (quest items are usually per character).
+- **Keep** (orange): you marked the item with `/as keep`; never shown as safe.
 - **Crafting** (teal): a reagent of a recipe known by any character (ProfTracker data). Tooltip: `Used in: 2 recipes (Alchemy: Major Mana Potion, ...)` and `Crafted by: Demnock, ...`. Unused trade goods say "Trade Goods (crafting material, not used by your saved recipes)".
 - **Gear** (grey): weapons / armour are never judged.
 - **Safe to sell** (green-grey): none of the above, the character holds tradeable units, and the item has a vendor or Auctionator price. The vendor sell price is shown on the row (when there's no AH price) and in the tooltip.
 - No tag: soulbound misc items (e.g. Hearthstone), recipes (an alt might learn it), items whose info isn't loaded yet.
 - **Safe to sell / delete** checkbox (Items view): only Safe to sell and Quest done items, with a summary line (count, vendor value, AH value with Auctionator). `/as usage off` hides everything. The All characters tab (plain text) has no tags.
 
-**On the game's own item tooltip (0.3.9).** Hovering any item anywhere (bags, bank, chat links) adds one AltStash line, from the logged-in character's point of view: green **AltStash: Quest done — safe to delete**, yellow **AltStash: Needed for <quest> (<character>)**, **AltStash: Quest item for <quest> (not completed yet)**, **AltStash: Quest item (unknown quest)**, teal **AltStash: Crafting reagent (N recipes)** or **AltStash: Safe to sell** (gear: no line). It's added through the same hook as "Alts have" (`TooltipDataProcessor`, or `OnTooltipSetItem` on older clients) and is skipped inside AltStash's own window, which shows the full details. `/as usage off` turns it off.
+**On the game's own item tooltip (0.3.9).** Hovering any item anywhere (bags, bank, chat links) adds one AltStash line, from the logged-in character's point of view: green **AltStash: Quest done — safe to delete**, yellow **AltStash: Needed for <quest> (<character>)**, **AltStash: Keep: quest chain not finished (<quest>, <ID>)**, **AltStash: Quest item: can't confirm, keep**, orange **AltStash: Keep (marked by you)**, teal **AltStash: Crafting reagent (N recipes)** or **AltStash: Safe to sell** (gear: no line). It's added through the same hook as "Alts have" (`TooltipDataProcessor`, or `OnTooltipSetItem` on older clients) and is skipped inside AltStash's own window, which shows the full details. `/as usage off` turns it off.
 
-**Leftover quest items (0.3.9).** To know which quest a leftover item belongs to, AltStash uses, in order: the game's own link for items in your bags (`C_Container.GetContainerItemQuestInfo` / Classic `GetContainerItemQuestInfo`: quest ID and whether that quest is active), quest objectives in your logs, and items you **received at a quest turn-in** (`QUEST_LOOT_RECEIVED`, or your own "You receive item" loot message within 5 seconds of `QUEST_TURNED_IN`). A quest item is "safe to delete" only when its quest is known **and** flagged completed on this character (`IsQuestFlaggedCompleted`), the quest isn't active on any character, no quest objective on any character needs the item, and no saved recipe uses it. Items received before 0.3.9 that the game doesn't link to a quest stay "Quest item (unknown quest)".
+**Leftover quest items (0.3.9).** To know which quest a leftover item belongs to, AltStash uses, in order: the game's own link for items in your bags (`C_Container.GetContainerItemQuestInfo` / Classic `GetContainerItemQuestInfo`: quest ID and whether that quest is active), quest objectives in your logs, and items you **received at a quest turn-in** (`QUEST_LOOT_RECEIVED`, or your own "You receive item" loot message within 5 seconds of `QUEST_TURNED_IN`). Since 0.4.0 these are only extra evidence; the safe / keep decision follows the quest database rules below.
 
 **How the data is collected:** each character's quest log is saved on login and whenever it changes (`QUEST_LOG_UPDATE`, `QUEST_ACCEPTED`, `QUEST_REMOVED`, `QUEST_TURNED_IN`; modern `C_QuestLog.GetInfo` / `GetQuestObjectives`, Classic `GetQuestLogTitle` / `GetQuestLogLeaderBoard`). Item objectives are matched **by item name**. Quest items seen in the bags (`GetContainerItemQuestInfo`) and objectives are remembered as item -> quest (`AltStashDB.questItems`), and each character's completed state for those quests is saved (`chars[..].questsDone`). Optional fields; schema stays 3.
 
-**Limits (please read):** AltStash only knows quests that are (or were, while it ran) in a saved quest log, and recipes ProfTracker has saved. It can't know about quests you haven't picked up, quests that need an item later in a chain, or recipes you haven't learned yet. Characters you haven't logged in on since 0.3.8 have no saved quest log (the tooltip says how many are missing). In the Classic quest API, quests under a collapsed quest-log header may be skipped. Treat "Safe to sell" as "not needed by anything AltStash knows about".
+**Limits (please read):** AltStash only knows quests that are (or were, while it ran) in a saved quest log, and recipes ProfTracker has saved. Since 0.4.0 the built-in quest database covers quests you haven't picked up and later chain steps for quest items in it; it still can't know recipes you haven't learned yet. Characters you haven't logged in on since 0.3.8 have no saved quest log (the tooltip says how many are missing). In the Classic quest API, quests under a collapsed quest-log header may be skipped. Treat "Safe to sell" as "not needed by anything AltStash knows about".
+
+## Quest database cross-reference (0.4.0)
+
+0.3.8 / 0.3.9 linked each item to **one** quest and called it safe once that quest was completed. That was wrong for chains: an item received when you turned in step 1 (or given for step 2) was marked "safe" while a later step that you hadn't picked up yet still needed it. Example (rogue level 20, Horde): *Fizzule's Whistle* (8066) arrives when you turn in **Deep Cover** (2458) and is required by **Mission: Possible But Not Probable** (2478); 0.3.9 linked it to 2458 only.
+
+0.4.0 ships `QuestItemDB.lua`, an item -> quest lookup with chain data, and uses these rules:
+
+- Every quest that uses the item is collected: from the database (objective, item given when you accept, required item, quest starter, quest-reward hint) **and** from the game (bag quest link, quest-log objectives). The later steps of those chains (next quest in the chain and direct follow-ups) are added too.
+- Quests that can't apply to the character (race / class masks) and quests whose exclusive alternative (or breadcrumb target) is done are skipped. A repeatable quest that uses the item always keeps it.
+- **Quest done: safe to delete** only when the item is in the database, every remaining quest is completed on this character and none is active on any character.
+- Otherwise: **Keep: quest chain not finished (<next quest>, <ID>)**, **Keep: needed for ...**, or **Quest item: can't confirm, keep** (not in the database, or a quest ID the database doesn't know). The turn-in heuristic and the game's bag quest ID can keep an item, but never make it safe on their own. When in doubt, AltStash keeps.
+- Non-quest-class items (cloth, tools, ...) are judged as before, except that an item given or required by a **class** quest you still have to do shows **Keep**.
+- The Items-view tags, the **Safe to sell / delete** filter and the game-tooltip line use the same rules. Hold **Shift** over an item to see the quest IDs and each one's state on the tooltip.
+- Completion is read live for the logged-in character and saved per character (`chars[..].questsDone`) for the quests of the items it holds, so alts are judged from their last login (unknown = not done = keep).
+
+**Data source and license.** `QuestItemDB.lua` is generated from **QuestieDB** 1.1.6, Forever flavor (baked data, build commit `4377c981ac`, https://github.com/Questie/QuestieDB), which converts the Classic Era data for WoW Forever and adds Forever corrections. It contains only quest-related items: 4,072 items (2,992 of them quest-class) and 4,735 quests (name, next quest, race / class masks, repeatable flag, prerequisites, exclusiveTo, follow-ups, breadcrumbs). QuestieDB / Questie data historically had no license; the QuestieDB team allows copying under **GPLv3** terms but can't promise that for every historic contributor ("when in doubt, all rights reserved"). If you redistribute AltStash with this file, do it under GPLv3-compatible terms, credit QuestieDB, and don't use the Questie name or logo. AltStash is not affiliated with Questie.
+
+**Limits.** QuestieDB's Forever data is a converted Era baseline plus Forever corrections: brand-new Forever quests or reworked chains that aren't in it yet show "can't confirm, keep" (or rely on the game's own quest link). Race / class masks for new Forever races come from QuestieDB. Use `/as questinfo <item>` to see exactly why an item got its verdict, and `/as keep <item>` to protect anything you're unsure about.
 
 ## Craft or sell? (0.3.5, needs Auctionator)
 
@@ -92,6 +111,9 @@ With **Auctionator** loaded (optional; listed in `## OptionalDeps`) and an AH sc
 | `/as debugname` | Print raw UnitName/UnitFullName/GetUnitName/candidate second-name API values (paste it to confirm how Forever exposes the second name) |
 | `/as prices on\|off` | Show/hide Auctionator craft-or-sell advice and AH item values |
 | `/as usage on\|off` | Show/hide Quest / Crafting / Safe to sell tags and the bag-tooltip line |
+| `/as keep <item link or ID>` | Never show the item as safe to sell / delete (no argument lists your keep list) |
+| `/as unkeep <item link or ID\|all>` | Remove an item (or everything) from the keep list |
+| `/as questinfo <item link or ID>` | Print the item's quest IDs, names, roles, per-quest completion on this character and the verdict reason |
 | `/as deposit 2\|8\|24` | Auction duration used for deposit estimates (default 24h) |
 | `/as mindeposit <copper>` | Minimum deposit per auction (default 100 = 1 silver) |
 | `/as help` | Command list |
@@ -144,7 +166,7 @@ Verified on warcraft.wiki.gg as available in Forever 1.60.1: `C_Container.GetCon
 Feature-detected at runtime with fallbacks: legacy `GetContainerNumSlots` / `GetContainerItemInfo`; tooltip via `TooltipDataProcessor.AddTooltipPostCall` (else `GameTooltip:HookScript("OnTooltipSetItem")`), all in `pcall`; bank bag ids derived from `NUM_BAG_SLOTS`, `NUM_REAGENTBAG_SLOTS`, `NUM_BANKBAGSLOTS` and `Enum.BagIndex` when present.
 
 ## Install
-Unzip the release (`AltStash-v0.3.9.zip`) into `Interface/AddOns`, so you have `Interface/AddOns/AltStash/AltStash.toc`. On the Forever client that is typically `World of Warcraft/_classic_beta_/Interface/AddOns/`. Restart the game or `/reload`.
+Unzip the release (`AltStash-v0.4.0.zip`) into `Interface/AddOns`, so you have `Interface/AddOns/AltStash/AltStash.toc`. On the Forever client that is typically `World of Warcraft/_classic_beta_/Interface/AddOns/`. Restart the game or `/reload`.
 
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md).
