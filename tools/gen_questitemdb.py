@@ -84,6 +84,9 @@ def lua_str(v):
     return '"' + v.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ') + '"'
 def num(v): return str(int(v)) if isinstance(v, (int, float)) else 'nil'
 out = []
+out.append('-- AltStash QuestItemDB.lua: quest and item data from QuestieDB (https://github.com/Questie/QuestieDB),')
+out.append('-- release 1.1.6, Forever flavor, commit %s.' % meta.get('X-BUILD-COMMIT'))
+out.append('-- Used and redistributed under the GNU General Public License v3 (GPL-3.0); see LICENSE. AltStash Copyright (C) 2026 Demnock.')
 out.append('-- AltStash QuestItemDB: item -> quest lookup with quest chain data. GENERATED, do not edit by hand.')
 out.append('-- Source: QuestieDB %s (Forever flavor, baked data, build commit %s), https://github.com/Questie/QuestieDB' % ('1.1.6', meta.get('X-BUILD-COMMIT')))
 out.append('-- Data license: see README (QuestieDB / Questie data, copied under the GPLv3 terms the Questie team allows).')

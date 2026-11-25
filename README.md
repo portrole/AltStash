@@ -168,5 +168,21 @@ Feature-detected at runtime with fallbacks: legacy `GetContainerNumSlots` / `Get
 ## Install
 Unzip the release (`AltStash-v0.4.0.zip`) into `Interface/AddOns`, so you have `Interface/AddOns/AltStash/AltStash.toc`. On the Forever client that is typically `World of Warcraft/_classic_beta_/Interface/AddOns/`. Restart the game or `/reload`.
 
+## License
+
+AltStash Copyright (C) 2026 Demnock.
+
+AltStash is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, version 3 of the License (GPL-3.0). It is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the [LICENSE](LICENSE) file for the full text.
+
+## Credits
+
+- **Jojo** started AltStash.
+- **QuestieDB** (https://github.com/Questie/QuestieDB) is the source of the quest and item data in `QuestItemDB.lua`
+  (QuestieDB 1.1.6, Forever data, commit 4377c981ac), used under the GPLv3 terms its team allows. AltStash is not
+  affiliated with or endorsed by the QuestieDB team.
+
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md).

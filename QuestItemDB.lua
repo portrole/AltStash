@@ -1,3 +1,6 @@
+-- AltStash QuestItemDB.lua: quest and item data from QuestieDB (https://github.com/Questie/QuestieDB),
+-- release 1.1.6, Forever flavor, commit 4377c981ac368d1593ec92788218e0a689a6a02b.
+-- Used and redistributed under the GNU General Public License v3 (GPL-3.0); see LICENSE. AltStash Copyright (C) 2026 Demnock.
 -- AltStash QuestItemDB: item -> quest lookup with quest chain data. GENERATED, do not edit by hand.
 -- Source: QuestieDB 1.1.6 (Forever flavor, baked data, build commit 4377c981ac368d1593ec92788218e0a689a6a02b), https://github.com/Questie/QuestieDB
 -- Data license: see README (QuestieDB / Questie data, copied under the GPLv3 terms the Questie team allows).
